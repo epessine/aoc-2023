@@ -23,6 +23,8 @@ func main() {
 	var total int64 = 0
 	regex := "([1-9]|(?:(one|two|three|four|five|six|seven|eight|nine)))"
 
+	strings.HasPrefix()
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		parsedLine := parseLine(line)

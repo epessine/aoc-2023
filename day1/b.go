@@ -1,20 +1,18 @@
-package main
+package day1
 
 import (
 	"bufio"
-	"log"
 	"os"
 	"regexp"
 	"strconv"
 	"strings"
 )
 
-func main() {
-	file, err := os.Open("day-one/input.txt")
+func solveB() int64 {
+	file, err := os.Open("day1/input.txt")
 
 	if err != nil {
-		log.Fatal(err)
-		return
+		panic(err)
 	}
 
 	defer file.Close()
@@ -22,8 +20,6 @@ func main() {
 	scanner := bufio.NewScanner(file)
 	var total int64 = 0
 	regex := "([1-9]|(?:(one|two|three|four|five|six|seven|eight|nine)))"
-
-	strings.HasPrefix()
 
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -34,11 +30,11 @@ func main() {
 		total += parsedDigits
 	}
 
-	log.Printf("result is %d", total)
-
 	if err := scanner.Err(); err != nil {
-		log.Fatal(err)
+		panic(err)
 	}
+
+	return total
 }
 
 func parseLine(line string) string {

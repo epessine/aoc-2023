@@ -34,6 +34,8 @@ func NewRootCommand() *cobra.Command {
 }
 
 func addCommands(root *cobra.Command) {
-	root.AddCommand(day1.Command())
-	root.AddCommand(day2.Command())
+	root.AddCommand(
+		day1.Command(),
+		day2.Command(),
+	)
 }

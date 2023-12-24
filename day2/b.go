@@ -1,28 +1,17 @@
 package day2
 
 import (
-	"bufio"
-	"os"
 	"strconv"
 	"strings"
+
+	"github.com/epessine/aoc-2023/challenge"
 )
 
-func solveB() int64 {
-	file, err := os.Open("day2/input.txt")
+func solveB(input *challenge.Input) int {
+	gamePowerSum := 0
 
-	if err != nil {
-		panic(err)
-	}
-
-	defer file.Close()
-
-	var gamePowerSum int64 = 0
-
-	scanner := bufio.NewScanner(file)
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		minimumSet := map[string]int64{
+	for line := range input.Lines() {
+		minimumSet := map[string]int{
 			"red":   0,
 			"blue":  0,
 			"green": 0,
@@ -31,9 +20,9 @@ func solveB() int64 {
 		for _, set := range sets {
 			colorStrings := strings.Split(set, ", ")
 			for _, colorString := range colorStrings {
-				color := strings.Split(strings.TrimSpace(colorString), " ")
+				color := strings.Fields(strings.TrimSpace(colorString))
 				colorName := color[1]
-				number, err := strconv.ParseInt(color[0], 10, 8)
+				number, err := strconv.Atoi(color[0])
 				if err != nil {
 					panic(err)
 				}

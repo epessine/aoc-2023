@@ -1,40 +1,34 @@
 package day1
 
 import (
-	"bufio"
-	"os"
 	"regexp"
 	"strconv"
 	"strings"
+	"sync"
+
+	"github.com/epessine/aoc-2023/challenge"
 )
 
-func solveB() int64 {
-	file, err := os.Open("day1/input.txt")
-
-	if err != nil {
-		panic(err)
-	}
-
-	defer file.Close()
-
-	scanner := bufio.NewScanner(file)
-	var total int64 = 0
+func solveB(input *challenge.Input) int {
 	regex := "([1-9]|(?:(one|two|three|four|five|six|seven|eight|nine)))"
-
-	for scanner.Scan() {
-		line := scanner.Text()
-		parsedLine := parseLine(line)
-		numbers := regexp.MustCompile(regex).FindAllString(parsedLine, -1)
-		parsedNumbers := replaceSpelledOutWithDigit(numbers)
-		parsedDigits, _ := strconv.ParseInt(parsedNumbers[0]+parsedNumbers[len(parsedNumbers)-1], 10, 32)
-		total += parsedDigits
+	result := make(chan int, 1)
+	defer close(result)
+	result <- 0
+	wg := sync.WaitGroup{}
+	for line := range input.Lines() {
+		wg.Add(1)
+		go func(line string) {
+			parsedLine := parseLine(line)
+			numbers := regexp.MustCompile(regex).FindAllString(parsedLine, -1)
+			parsedNumbers := replaceSpelledOutWithDigit(numbers)
+			parsedDigits, _ := strconv.Atoi(parsedNumbers[0] + parsedNumbers[len(parsedNumbers)-1])
+			total := <-result
+			result <- total + parsedDigits
+			wg.Done()
+		}(line)
 	}
-
-	if err := scanner.Err(); err != nil {
-		panic(err)
-	}
-
-	return total
+	wg.Wait()
+	return <-result
 }
 
 func parseLine(line string) string {

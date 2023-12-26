@@ -16,6 +16,14 @@ func (input *Input) Lines() <-chan string {
 	return input.lines
 }
 
+func (input *Input) AllLines() []string {
+	var lines []string
+	for line := range input.lines {
+		lines = append(lines, line)
+	}
+	return lines
+}
+
 func GetInput(cmd *cobra.Command) *Input {
 	file, err := os.Open(fmt.Sprintf("day%s/input.txt", cmd.Parent().Use))
 	if err != nil {

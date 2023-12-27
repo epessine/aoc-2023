@@ -3,6 +3,7 @@ package day5
 import (
 	"strconv"
 	"strings"
+	"sync"
 )
 
 type Seed []int
@@ -24,6 +25,37 @@ func getSeedsFromLine(line string) []Seed {
 		s[0] = n
 		seeds = append(seeds, s)
 	}
+	return seeds
+}
+
+func getSeedsFromRangeLine(line string) <-chan Seed {
+	ns := make([]int, 20)
+	for _, f := range strings.Fields(strings.TrimPrefix(line, "seeds: ")) {
+		n, err := strconv.Atoi(f)
+		if err != nil {
+			panic(err)
+		}
+		ns = append(ns, n)
+	}
+	seeds := make(chan Seed)
+	go func() {
+		wg := sync.WaitGroup{}
+		for i, n := range ns {
+			wg.Add(1)
+			go func(i int, n int) {
+				defer wg.Done()
+				if i%2 == 0 {
+					for sn := n; sn < n+ns[i+1]; sn++ {
+						s := make(Seed, 8)
+						s[0] = sn
+						seeds <- s
+					}
+				}
+			}(i, n)
+		}
+		wg.Wait()
+		close(seeds)
+	}()
 	return seeds
 }
 

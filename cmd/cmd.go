@@ -10,6 +10,7 @@ import (
 	"github.com/epessine/aoc-2023/day2"
 	"github.com/epessine/aoc-2023/day3"
 	"github.com/epessine/aoc-2023/day4"
+	"github.com/epessine/aoc-2023/day5"
 )
 
 func NewRootCommand() *cobra.Command {
@@ -41,5 +42,6 @@ func addCommands(root *cobra.Command) {
 		day2.Command(),
 		day3.Command(),
 		day4.Command(),
+		day5.Command(),
 	)
 }

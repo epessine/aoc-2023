@@ -1,30 +1,25 @@
 package day7
 
 import (
-	"sort"
-	"strconv"
-	"strings"
-
 	"github.com/epessine/aoc-2023/challenge"
 )
 
 func solveA(input *challenge.Input) int {
-	hands := Hands{}
-	for line := range input.Lines() {
-		fields := strings.Fields(line)
-		bid, err := strconv.Atoi(fields[1])
-		if err != nil {
-			panic(err)
-		}
-		hand := Hand{Bid: bid, Cards: []rune(fields[0])}
-		hand.setType()
-		hands = append(hands, hand)
+	CardValues = map[rune]int{
+		'A': 12,
+		'K': 11,
+		'Q': 10,
+		'J': 9,
+		'T': 8,
+		'9': 7,
+		'8': 6,
+		'7': 5,
+		'6': 4,
+		'5': 3,
+		'4': 2,
+		'3': 1,
+		'2': 0,
 	}
-	sort.Sort(hands)
-	total := 0
-	for i, hand := range hands {
-		rank := i + 1
-		total += hand.Bid * rank
-	}
-	return total
+	JokerRule = false
+	return parseInput(input).totalWinnings()
 }

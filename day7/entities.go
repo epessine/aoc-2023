@@ -2,6 +2,11 @@ package day7
 
 import (
 	"slices"
+	"sort"
+	"strconv"
+	"strings"
+
+	"github.com/epessine/aoc-2023/challenge"
 )
 
 type HandType uint8
@@ -16,7 +21,10 @@ const (
 	FiveOfKind
 )
 
-var CardValues = map[rune]int{'A': 12, 'K': 11, 'Q': 10, 'J': 9, 'T': 8, '9': 7, '8': 6, '7': 5, '6': 4, '5': 3, '4': 2, '3': 1, '2': 0}
+var (
+	CardValues map[rune]int
+	JokerRule  bool
+)
 
 type Hand struct {
 	Bid   int
@@ -24,29 +32,85 @@ type Hand struct {
 	Type  HandType
 }
 
-func (h *Hand) setType() {
-	c := make([]rune, len(h.Cards))
+func parseInput(i *challenge.Input) Hands {
+	hands := Hands{}
+	for line := range i.Lines() {
+		fields := strings.Fields(line)
+		bid, err := strconv.Atoi(fields[1])
+		if err != nil {
+			panic(err)
+		}
+		hand := Hand{Bid: bid, Cards: []rune(fields[0])}
+		hand.setType(JokerRule)
+		hands = append(hands, hand)
+	}
+	sort.Sort(hands)
+	return hands
+}
+
+func (h *Hand) setType(jokerRule bool) {
+	h.matchType()
+	if jokerRule {
+		h.applyJokerRule()
+	}
+}
+
+func (h *Hand) unique() int {
 	c2 := make([]rune, len(h.Cards))
-	copy(c, h.Cards)
 	copy(c2, h.Cards)
-	slices.Sort(c)
 	slices.Sort(c2)
-	uc := len(slices.Compact(c2))
+	return len(slices.Compact(c2))
+}
+
+func (h *Hand) matchType() {
+	unique := h.unique()
+	c := make([]rune, len(h.Cards))
+	copy(c, h.Cards)
+	slices.Sort(c)
 	switch {
-	case uc == 1:
+	case unique == 1:
 		h.Type = FiveOfKind
-	case uc == 2 && c[1] == c[3]:
+	case unique == 2 && c[1] == c[3]:
 		h.Type = FourOfKind
-	case uc == 2 && c[1] != c[3]:
+	case unique == 2 && c[1] != c[3]:
 		h.Type = FullHouse
-	case uc == 3 && ((c[0] == c[2]) || (c[1] == c[3]) || (c[2] == c[4])):
+	case unique == 3 && ((c[0] == c[2]) || (c[1] == c[3]) || (c[2] == c[4])):
 		h.Type = ThreeOfAKind
-	case uc == 3 && !((c[0] == c[2]) || (c[1] == c[3]) || (c[2] == c[4])):
+	case unique == 3 && !((c[0] == c[2]) || (c[1] == c[3]) || (c[2] == c[4])):
 		h.Type = TwoPair
-	case uc == 4:
+	case unique == 4:
 		h.Type = OnePair
-	case uc == 5:
+	case unique == 5:
 		h.Type = HighCard
+	}
+}
+
+func (h *Hand) applyJokerRule() {
+	jokers := len([]rune(strings.Map(func(r rune) rune {
+		if r == 'J' {
+			return r
+		}
+		return -1
+	}, string(h.Cards))))
+	if jokers == 0 {
+		return
+	}
+	switch h.Type {
+	case HighCard:
+		h.Type = OnePair
+	case OnePair:
+		h.Type = ThreeOfAKind
+	case TwoPair:
+		switch jokers {
+		case 2:
+			h.Type = FourOfKind
+		case 1:
+			h.Type = FullHouse
+		}
+	case ThreeOfAKind:
+		h.Type = FourOfKind
+	case FullHouse, FourOfKind:
+		h.Type = FiveOfKind
 	}
 }
 
@@ -68,4 +132,13 @@ func (hs Hands) Less(i, j int) bool {
 		}
 	}
 	return hs[i].Type < hs[j].Type
+}
+
+func (hs Hands) totalWinnings() int {
+	total := 0
+	for i, hand := range hs {
+		rank := i + 1
+		total += hand.Bid * rank
+	}
+	return total
 }
